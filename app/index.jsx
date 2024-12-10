@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -16,17 +16,53 @@ import {
   CalendarDaysIcon,
 } from "react-native-heroicons/outline";
 import { MapPinIcon } from "react-native-heroicons/solid";
+import {debounce} from 'lodash';
+import {fetchLocations, fetchWeatherForcast} from '../api/weather'
+
+
+
 
 export default function Index() {
   const [showSearch, toggleSearch] = useState(false);
-  const [location, setLocation] = useState([
-    "Colombo, Sri Lanka",
-    "Galle, Sri Lanka",
-  ]);
+  const [locations, setLocations] = useState([]);
+  const [weather,setWeather]=useState({})
+  
+
+
+
 
   const handleLocation = (loc) => {
     console.log("location", loc);
+    setLocations([]);
+    toggleSearch(false)
+    fetchWeatherForcast({
+      cityName:loc.name,
+      days:'7'
+    }).then(data=>{
+      setWeather(data)
+      console.log("got focast",data);
+    })
   };
+
+
+  const handleSearch = value =>{
+    console.log('value: ',value)
+
+    if(value.length>2){
+      
+      fetchLocations({cityName:value}).then(data=>{
+        setLocations(data);
+        console.log("got locations",data);
+      })
+
+    }
+   
+  }
+
+  const handleTextDebounce = useCallback(debounce(handleSearch, 1200), [handleSearch]);
+ 
+  const {current, location}=weather;
+
 
   return (
     <View className="flex-1 relative">
@@ -46,6 +82,7 @@ export default function Index() {
           >
             {showSearch ? (
               <TextInput
+              onChangeText={handleTextDebounce}
                 placeholder="Search city"
                 placeholderTextColor={"lightgray"}
                 className="pl-6 h-10 pb-1 flex-1 text-base text-white"
@@ -60,10 +97,10 @@ export default function Index() {
               <MagnifyingGlassIcon size="25" color="white" />
             </TouchableOpacity>
           </View>
-          {location.length > 0 && showSearch ? (
+          {locations.length > 0 && showSearch ? (
             <View className="absolute w-full bg-gray-300 top-16 rounded-3xl">
-              {location.map((loc, index) => {
-                let showBorder = index + 1 != location.length;
+              {locations.map((loc, index) => {
+                let showBorder = index + 1 != locations.length;
                 let borderClass = showBorder
                   ? "border-b-2 border-b-gray-400"
                   : "";
@@ -77,7 +114,7 @@ export default function Index() {
                     }
                   >
                     <MapPinIcon size={20} color="gray" />
-                    <Text className="text-black text-lg ml-2">{loc}</Text>
+                    <Text className="text-black text-lg ml-2">{loc.name},{loc.country}</Text>
                   </TouchableOpacity>
                 );
               })}
