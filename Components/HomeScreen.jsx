@@ -23,6 +23,7 @@ import { fetchLocations, fetchWeatherForcast } from "../api/weather";
 import * as Progress from "react-native-progress";
 import { getData, storeData } from "../utils/asyncStorage";
 import theme from "../theme/theme";
+import { weatherImages } from "../constants/index";
 
 export default function HomeScreen() {
   const [showSearch, toggleSearch] = useState(false);
@@ -68,6 +69,7 @@ export default function HomeScreen() {
       setWeather(data);
       setLoading(false);
     });
+    console.log(weather);
   };
 
   const handleTextDebounce = useCallback(debounce(handleSearch, 1200), [
@@ -174,7 +176,7 @@ export default function HomeScreen() {
                   {/* Weather Image */}
                   <View className="flex-row justify-center">
                     <Image
-                      source={{ uri: `https:${current?.condition?.icon}` }}
+                      source={weatherImages[current?.condition?.text]}
                       className="w-52 h-52"
                     />
                   </View>
