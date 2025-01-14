@@ -1,30 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { auth, getAllUserData } from "../utils/firebase.utils";
 import "../global.css";
 
-const LeaderboardItem = ({ rank, name, points, level, imageUrl }) => (
+const LeaderboardItem = ({ rank, name, points, level, imageUrl, id }) => (
   <View className="flex-row items-center p-4 border-b border-gray-600">
-    {/* Rank with special styling for top 3 */}
-    <Text className={`text-2xl w-8 ${
-      rank === 1 ? 'text-yellow-400' :
-      rank === 2 ? 'text-gray-400' :
-      rank === 3 ? 'text-amber-700' :
-      'text-gray-500'
-    }`}>
+    <Text
+      className={`text-2xl w-8 ${
+        rank === 1
+          ? "text-yellow-400"
+          : rank === 2
+          ? "text-gray-400"
+          : rank === 3
+          ? "text-amber-700"
+          : "text-gray-500"
+      }`}
+    >
       {rank}
     </Text>
-    
-    {/* Avatar */}
-    <Image 
-      source={{ uri: imageUrl }} 
+    <Image
+      source={{ uri: imageUrl }}
       className="w-12 h-12 rounded-full border-2 border-teal-400"
     />
-    
-    {/* User Info */}
     <View className="flex-1 ml-4">
-      <Text className="text-white text-lg font-semibold">{name}</Text>
-      {/* Progress Bar */}
+      <Text className="text-white text-lg font-semibold">
+        {name}
+        {auth.currentUser?.uid === id ? " (You)" : ""}
+      </Text>
       <View className="bg-gray-700 h-2 rounded-full mt-2 w-full">
         <View
           className="bg-teal-400 h-2 rounded-full"
@@ -32,8 +35,6 @@ const LeaderboardItem = ({ rank, name, points, level, imageUrl }) => (
         />
       </View>
     </View>
-    
-    {/* Score Details */}
     <View className="items-end ml-4">
       <Text className="text-teal-400 font-bold">{points} pts</Text>
       <View className="flex-row items-center mt-1">
@@ -44,43 +45,32 @@ const LeaderboardItem = ({ rank, name, points, level, imageUrl }) => (
 );
 
 export default function LeaderboardScreen() {
-  const leaderboardData = [
-    {
-      rank: 1,
-      name: "John Doe",
-      points: 2300,
-      level: 5,
-      imageUrl: "https://randomuser.me/api/portraits/men/1.jpg"
-    },
-    {
-      rank: 2,
-      name: "Jane Smith",
-      points: 2100,
-      level: 4,
-      imageUrl: "https://randomuser.me/api/portraits/women/2.jpg"
-    },
-    {
-      rank: 3,
-      name: "Mike Johnson",
-      points: 1900,
-      level: 4,
-      imageUrl: "https://randomuser.me/api/portraits/men/3.jpg"
-    },
-    {
-      rank: 4,
-      name: "Sarah Wilson",
-      points: 1800,
-      level: 3,
-      imageUrl: "https://randomuser.me/api/portraits/women/4.jpg"
-    },
-    {
-      rank: 5,
-      name: "Alex Brown",
-      points: 1700,
-      level: 3,
-      imageUrl: "https://randomuser.me/api/portraits/men/5.jpg"
-    }
-  ];
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (auth.currentUser) {
+        try {
+          const users = await getAllUserData();
+          setLeaderboardData(users);
+        } catch (error) {
+          console.error("Error fetching user data", error);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center">
+        <ActivityIndicator size="large" color="#0bb3b2" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
@@ -95,11 +85,23 @@ export default function LeaderboardScreen() {
       </View>
 
       {/* Leaderboard List */}
-      <ScrollView className="flex-1">
-        {leaderboardData.map((item, index) => (
-          <LeaderboardItem key={index} {...item} />
-        ))}
-      </ScrollView>
+      {auth.currentUser ? (
+        <ScrollView className="flex-1">
+          {leaderboardData.map((item, index) => (
+            <LeaderboardItem key={index} {...item} />
+          ))}
+        </ScrollView>
+      ) : (
+        <View className="flex-1 items-center justify-center">
+          <Image
+            source={require("../assets/images/leaderboard.png")}
+            className="w-48 h-48 m-10"
+          />
+          <Text className="text-2xl font-extrabold text-center text-gray-400">
+            Sign In or Sign Up to view the Leaderboard
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
