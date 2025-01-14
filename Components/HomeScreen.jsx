@@ -24,6 +24,7 @@ import * as Progress from "react-native-progress";
 import { getData, storeData } from "../utils/asyncStorage";
 import theme from "../theme/theme";
 import { weatherImages } from "../constants/index";
+import Profile from './Profile'
 
 export default function HomeScreen() {
   const [showSearch, toggleSearch] = useState(false);
@@ -97,6 +98,9 @@ export default function HomeScreen() {
                 keyboardShouldPersistTaps="handled"
               >
                 {/* Title Section */}
+                <View className="items-center mt-4 mr-4">
+                 <Profile/>
+                </View>
                 <View className="items-center mt-4">
                   <Text className="text-3xl font-bold text-white">
                     SkyAlert
@@ -108,7 +112,7 @@ export default function HomeScreen() {
                   style={{ marginTop: Platform.OS === "ios" ? 0 : 10 }}
                 >
                   <View
-                    className="flex-row items-center justify-end rounded-full"
+                    className="flex-row items-center justify-start rounded-full"
                     style={{
                       backgroundColor: showSearch
                         ? theme.bgWhite(0.2)

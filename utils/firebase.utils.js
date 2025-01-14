@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInWithPopup } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, GoogleAuthProvider, signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, signOut, signInWithPopup,updateProfile } from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, getDoc } from "firebase/firestore";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,11 +26,16 @@ export const auth = initializeAuth(app, {
 const db = getFirestore(app);
 
 // Sign Up with Email and Password
-export const signUpWithEmailPassword = async (email, password) => {
+export const signUpWithEmailPassword = async (email, password, displayName) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log("User signed up successfully");
-        return userCredential.user;
+        if (displayName) {
+            await updateProfile(userCredential.user, {
+              displayName: displayName
+            });
+          }
+        return userCredential;
     } catch (error) {
         console.error("Error signing up with email/password", error);
         throw error; // Re-throw the error so it can be handled by the calling code
@@ -53,11 +59,11 @@ export const signInWithGoogle = async () => {
     try {
         const provider = new GoogleAuthProvider();
         const userCredential = await signInWithPopup(auth, provider);
-        return userCredential.user;
-    } catch (error) {
+        return userCredential.user; 
+      } catch (error) {
         console.error("Error signing in with Google", error);
         throw error;
-    }
+      }
 };
 
 // Sign Out
@@ -71,20 +77,22 @@ export const signOutUser = async () => {
     }
 };
 
-// Copy user data to Firestore
+
 export const copyUserDataToFirestore = async (user) => {
     try {
         const userRef = doc(db, "users", user.uid);
         const userSnapshot = await getDoc(userRef);
-
+    
         if (!userSnapshot.exists()) {
-            await setDoc(userRef, {
-                email: user.email,
-                points: 0,
-            });
+          await setDoc(userRef, {
+            email: user.email,
+            displayName: user.displayName || null,
+            points: 0,
+            createdAt: Date.now(),
+          });
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Error copying user data to Firestore", error);
         throw error;
-    }
+      }
 };

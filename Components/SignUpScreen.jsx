@@ -3,27 +3,34 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
 import { signUpWithEmailPassword } from '../utils/firebase.utils'; // Firebase function
 import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient'; // Gradient library
+import { LinearGradient } from 'expo-linear-gradient'; 
+import { copyUserDataToFirestore } from '../utils/firebase.utils';// Gradient library
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignUp = () => {
+
+    
     if (password !== confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    signUpWithEmailPassword(email, password)
-      .then(() => {
-        // Navigate to Home or Dashboard
-        navigation.navigate('Home');
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+    signUpWithEmailPassword(email, password, displayName)
+    .then((userCredential) => {
+      console.log("User signed up user credential",userCredential);
+      const user = userCredential.user; 
+      console.log("User signed up successfully",user);
+      copyUserDataToFirestore(user); 
+      navigation.navigate('SignIn');
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
   };
 
   return (
@@ -38,11 +45,18 @@ export default function SignUpScreen() {
     </View>
 
     <View className="mt-8">
+    <TextInput
+    className="border-b border-gray-500 mb-4 text-white placeholder-white"
+    placeholder="Email"
+    value={email}
+    onChangeText={setEmail}
+    placeholderTextColor="#ccc"
+  />
       <TextInput
         className="border-b border-gray-500 mb-4 text-white placeholder-white"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="Display Name"
+        value={displayName}
+        onChangeText={setDisplayName}
         placeholderTextColor="#ccc"
       />
       <TextInput

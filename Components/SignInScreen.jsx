@@ -1,9 +1,10 @@
 // SignInScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity,Image } from 'react-native';
-import { signInWithEmailPassword,signInWithGoogle } from '../utils/firebase.utils'; // Firebase function
+import { copyUserDataToFirestore, signInWithEmailPassword,signInWithGoogle } from '../utils/firebase.utils'; // Firebase function
 import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient'; // Gradient library
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 export default function SignInScreen() {
   const navigation = useNavigation();
@@ -23,12 +24,20 @@ export default function SignInScreen() {
 
   const handleGoogleSignIn = () => {
     signInWithGoogle()
-      .then(() => {
-        navigation.navigate('HomeTabs');
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+    .then((user) => {
+      
+      copyUserDataToFirestore(user)
+        .then(() => {
+         
+          navigation.navigate('HomeTabs');
+        })
+        .catch((error) => {
+          alert("Error copying user data: " + error.message);
+        });
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
   };
 
   return (
@@ -61,17 +70,7 @@ export default function SignInScreen() {
           className="bg-teal-700 p-4 rounded-lg mt-5"
         >
           <Text className="text-white text-center text-2xl">Sign In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-  onPress={handleGoogleSignIn}
-  className="bg-white p-4 rounded-lg mt-5 flex-row items-center justify-center"
->
-  <Image
-  source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg' }} // Google logo URL
-    className="w-6 h-6 mr-3" // Adjust size and margin
-  />
-  <Text className="text-black text-center text-2xl">Sign In with Google</Text>
-</TouchableOpacity>
+        </TouchableOpacity>     
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')} className="mt-4">
           <Text className="text-teal-500 text-center">Don't have an account? Sign Up</Text>
         </TouchableOpacity>
@@ -79,3 +78,14 @@ export default function SignInScreen() {
     </View>
   );
 }
+
+//<TouchableOpacity
+//   onPress={handleGoogleSignIn}
+//   className="bg-white p-4 rounded-lg mt-5 flex-row items-center justify-center"
+// >
+//   <Image
+//   source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg' }} // Google logo URL
+//     className="w-6 h-6 mr-3" // Adjust size and margin
+//   />
+//   <Text className="text-black text-center text-2xl">Sign In with Google</Text>
+// </TouchableOpacity>
