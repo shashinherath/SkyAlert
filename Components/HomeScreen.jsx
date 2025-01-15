@@ -20,6 +20,7 @@ import {
 import { MapPinIcon } from "react-native-heroicons/solid";
 import { debounce } from "lodash";
 import { fetchLocations, fetchWeatherForcast } from "../api/weather";
+import { auth, updatePoints } from "../utils/firebase.utils";
 import * as Progress from "react-native-progress";
 import { getData, storeData } from "../utils/asyncStorage";
 import theme from "../theme/theme";
@@ -32,18 +33,30 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const handleLocation = (loc) => {
+  const handleLocation = async (loc) => {
     setLocations([]);
     toggleSearch(false);
     setLoading(true);
-    fetchWeatherForcast({
-      cityName: loc.name,
-      days: "7",
-    }).then((data) => {
-      setWeather(data);
+
+    try {
+      // Fetch weather data
+      const weatherData = await fetchWeatherForcast({
+        cityName: loc.name,
+        days: "7",
+      });
+
+      setWeather(weatherData);
       setLoading(false);
       storeData("city", loc.name);
-    });
+
+      // Update points if user is logged in
+      if (auth.currentUser) {
+        await updatePoints(auth.currentUser.uid, 10);
+      }
+    } catch (error) {
+      console.error("Error handling location:", error);
+      setLoading(false);
+    }
   };
 
   const handleSearch = (value) => {

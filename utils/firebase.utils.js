@@ -150,3 +150,21 @@ export const getAllUserData = async () => {
     throw error;
   }
 };
+
+export const updatePoints = async (userId, points) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+      await setDoc(userRef, {
+        ...userData,
+        points: userData.points + points,
+      });
+    }
+  } catch (error) {
+    console.error("Error updating points", error);
+    throw error;
+  }
+};
