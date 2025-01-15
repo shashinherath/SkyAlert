@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, getAllUserData } from "../utils/firebase.utils";
 import "../global.css";
@@ -47,20 +54,26 @@ const LeaderboardItem = ({ rank, name, points, level, imageUrl, id }) => (
 export default function LeaderboardScreen() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    if (auth.currentUser) {
+      try {
+        const users = await getAllUserData();
+        setLeaderboardData(users);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    }
+    setLoading(false);
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchData().then(() => setRefreshing(false));
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (auth.currentUser) {
-        try {
-          const users = await getAllUserData();
-          setLeaderboardData(users);
-        } catch (error) {
-          console.error("Error fetching user data", error);
-        }
-      }
-      setLoading(false);
-    };
-
     fetchData();
   }, []);
 
@@ -86,7 +99,17 @@ export default function LeaderboardScreen() {
 
       {/* Leaderboard List */}
       {auth.currentUser ? (
-        <ScrollView className="flex-1">
+        <ScrollView
+          className="flex-1"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#0bb3b2"
+              colors={["#0bb3b2"]}
+            />
+          }
+        >
           {leaderboardData.map((item, index) => (
             <LeaderboardItem key={index} {...item} />
           ))}
