@@ -7,6 +7,7 @@ const getCurrentTime = () => {
 const time = getCurrentTime();
 
 const dayWeatherImages = {
+  "Partly Cloudy": require("../assets/images/partlycloudy.png"),
   "Partly cloudy": require("../assets/images/partlycloudy.png"),
   "Moderate rain": require("../assets/images/moderaterain.png"),
   "Heavy rain": require("../assets/images/heavyrain.png"),

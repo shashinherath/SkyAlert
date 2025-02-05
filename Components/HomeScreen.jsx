@@ -116,7 +116,7 @@ export default function HomeScreen() {
                 </View>
                 <View className="items-center mt-4">
                   <Text className="text-3xl font-bold text-teal-500">
-                    Sky Alert
+                    SkyAlert
                   </Text>
                 </View>
                 {/* Search Section */}

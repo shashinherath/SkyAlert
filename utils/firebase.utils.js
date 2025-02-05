@@ -110,7 +110,7 @@ export const copyUserDataToFirestore = async (user) => {
       await setDoc(userRef, {
         email: user.email,
         displayName: user.displayName || null,
-        points: 0,
+        points: 500,
         createdAt: Date.now(),
       });
     }
