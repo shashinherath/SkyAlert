@@ -27,7 +27,7 @@ const LeaderboardItem = ({ rank, name, points, level, imageUrl, id }) => (
       {rank}
     </Text>
     <Image
-      source={{ uri: imageUrl }}
+      source={require("../assets/images/avatar.png")}
       className="w-12 h-12 rounded-full border-2 border-teal-400"
     />
     <View className="flex-1 ml-4">
