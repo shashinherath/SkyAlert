@@ -6,6 +6,7 @@ import LeaderboardScreen from "../Components/LeaderboardScreen";
 import { Ionicons } from "@expo/vector-icons";
 import SignInScreen from "../Components/SignInScreen";
 import SignUpScreen from "../Components/SignUpScreen";
+import ProfileScreen from "../Components/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -40,7 +41,17 @@ export default function Index() {
     <Stack.Navigator>
     <Stack.Screen name="HomeTabs" component={TabNavigator} options={{ headerShown: false }} />
      <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }}/>
+     <Stack.Screen 
+     name="ProfileScreen" 
+     component={ProfileScreen} 
+     options={{ 
+       headerShown: false, 
+       presentation: 'card' 
+     }}
+   />
+ 
      <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }}/>
+  
     </Stack.Navigator>
   );
 }
